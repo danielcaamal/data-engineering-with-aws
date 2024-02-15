@@ -22,6 +22,20 @@ Nanodegree data engineering lessons from Udacity
       - [Disadvantages of NoSQL Databases](#disadvantages-of-nosql-databases)
       - [Introduction to Apache Cassandra](#introduction-to-apache-cassandra)
     - [Remember SQL vs NoSQL](#remember-sql-vs-nosql)
+  - [Modeling relational databases](#modeling-relational-databases)
+    - [Importance of Relational Databases](#importance-of-relational-databases)
+    - [Online Analytical Processing (OLAP) vs Online Transactional Processing (OLTP)](#online-analytical-processing-olap-vs-online-transactional-processing-oltp)
+    - [Normalization and Denormalization](#normalization-and-denormalization)
+    - [Fact and Dimension Tables](#fact-and-dimension-tables)
+      - [Star Schema and Snowflake Schema](#star-schema-and-snowflake-schema)
+  - [No Sql Data Models](#no-sql-data-models)
+    - [Importance of NoSQL Databases](#importance-of-nosql-databases-1)
+    - [The CAP Theorem](#the-cap-theorem)
+    - [Apache Cassandra](#apache-cassandra)
+      - [CQL](#cql)
+      - [Primary Key](#primary-key)
+      - [Clustering Columns](#clustering-columns)
+      - [Where Clause](#where-clause)
 
 ## 01 - Data Modeling
 
@@ -243,7 +257,62 @@ Source: [Data Engineering with AWS - Udacity](https://learn.udacity.com/nanodegr
 ![Star Schema](images/star-schema.png)
 Source: [Data Engineering with AWS - Udacity](https://learn.udacity.com/nanodegrees/nd027)
 
-
 - Snowflake Schema: A fact table in the middle connected to dimension tables, which are connected to other dimension tables.
   - Star Schema is a special, simplified case of the Snowflake Schema.
   - Snowflake is more normalized than Star Schema, but only in 1NF or 2NF.
+
+### No Sql Data Models
+
+#### Importance of NoSQL Databases
+
+- Need of high availability in the data
+- Having large amounts of data
+- Need of linear horizontal scaling
+- Low latency and high throughput
+- Need of fast reads and writes
+- Eventual consistency is acceptable: The data will be consistent eventually, but not right away.
+
+#### The CAP Theorem
+
+- Consistency: Every read receives the most recent write or an error.
+- Availability: Every request receives a response, without the guarantee that it contains the most recent write.
+- Partition Tolerance: The system continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes.
+
+Note: There is no such thing as Consistency and Availability at the same time, in a distributed system it must always tolerate networks issues, so you can only choose between Consistency (CP) and Availability (AP).
+
+![CAP Theorem](images/cap-theorem.png)
+
+#### Apache Cassandra
+
+- Denormalization is not just a Ok, it's a must.
+- Denormalization must be done for fast reads.
+- Apache Cassandra has been optimized for fast writes.
+- Always think queries first.
+- One table per query is a great strategy.
+- Apache Cassandra does not allow for JOINs between tables.
+
+##### CQL
+
+Cassandra Query Language (CQL) is a query language for the Apache Cassandra database. It is a close relative of SQL.
+
+- Joins, group by, subqueries are not allowed.
+
+##### Primary Key
+
+- Must be unique
+- Is made up of either just the partition key or composite of the partition key and clustering columns.
+- The partition key will determine the distribution of data across the system.
+- The clustering columns will sort the data in sorted order.
+- The primary key is made up of the partition key and clustering columns.
+
+##### Clustering Columns
+
+- More than one clustering column can be added.
+- The clustering columns will sort the data in sorted order.
+
+##### Where Clause
+
+- Data modeling in Apache Cassandra is query focused, and that focus needs to be on the WHERE clause.
+- The WHERE clause is how you will be accessing your data, and is very important to get right.
+- The partition key will be used in the WHERE clause.
+- It is possible to do a query without a WHERE clause, but it is not recommended (ALLOW FILTERING).
