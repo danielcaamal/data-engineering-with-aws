@@ -164,3 +164,86 @@ Is a free and open-source, distributed, wide column store, NoSQL database manage
 #### Remember SQL vs NoSQL
 
 NoSQL databases and Relational Databases do not replace each other for all tasks. Both do different tasks extremely well, and should be used for the use cases they fit best.
+
+### Modeling relational databases
+
+#### Importance of Relational Databases
+
+- Standardization of data model: The data model is the same across all tables.
+- Flexibility in adding and altering tables: You can add new tables and columns to accommodate new types of data.
+- Data Integrity: The data is correct and consistent across the database.
+- Structured Query Language (SQL): The ability to do ad-hoc queries.
+- Simplicity: The structure is simple and easy to understand.
+- Intuitive Organization: The data is organized in tables.
+
+#### Online Analytical Processing (OLAP) vs Online Transactional Processing (OLTP)
+
+- OLAP: These type of databases are optimized for reads
+- OLTP: These type of databases are optimized for writes, inserts, updates and deletes.
+
+#### Normalization and Denormalization
+
+- Normalization: To reduce data redundancy and increase data integrity.
+  - Objetives:
+    - To free the database from unwanted insertions, updates, and deletion dependencies.
+    - To reduce the need for refactoring the database as new types of data are introduced.
+    - To make the relational model more informative to users.
+    - To make the database neutral to the query statistics.
+  - Normal Forms:
+    - First Normal Form (1NF):
+      - Atomic values: Each cell contains unique and single values.
+      - Be able to add data without altering tables.
+      - Separate different relation into different tables.
+      - Keep relationships between tables together with foreign keys.
+    - Second Normal Form (2NF):
+      - Have reached 1NF.
+      - All columns in the table must rely on the primary key.
+    - Third Normal Form (3NF):
+      - Have reached 2NF.
+      - No transitive dependencies.
+- Denormalization: To increase read performance.
+  - Objetives:
+    - To speed up reads.
+    - To add redundant copies of the data.
+    - To avoid expensive joins.
+    - To avoid complex joins.
+    - To avoid slow write performance.
+  - Denormalization comes after normalization.
+
+#### Fact and Dimension Tables
+
+- Dimension tables: Contains the data about the business.
+  - Examples:
+    - Users
+    - Products
+    - Time
+- Fact tables: Provides the metric of the business process.
+  - Examples:
+    - Sales
+    - Revenue
+    - Costs
+
+Example:
+![Fact and dimension tables](images/dimension-fact-tables.png)
+Source: [Data Engineering with AWS - Udacity](https://learn.udacity.com/nanodegrees/nd027)
+
+##### Star Schema and Snowflake Schema
+
+- Star Schema: A fact table in the middle connected to dimension tables.
+  - Benefits:
+    - Denormalized
+    - Simplified queries
+    - Fast aggregations
+  - Drawbacks:
+    - Data redundancy
+    - Data integrity
+    - Query performance and query complexity
+    - Many to many relationships
+
+![Star Schema](images/star-schema.png)
+Source: [Data Engineering with AWS - Udacity](https://learn.udacity.com/nanodegrees/nd027)
+
+
+- Snowflake Schema: A fact table in the middle connected to dimension tables, which are connected to other dimension tables.
+  - Star Schema is a special, simplified case of the Snowflake Schema.
+  - Snowflake is more normalized than Star Schema, but only in 1NF or 2NF.
