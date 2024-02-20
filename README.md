@@ -365,3 +365,58 @@ Cassandra Query Language (CQL) is a query language for the Apache Cassandra data
   - Grouping sets:
     - Group by CUBE(dim1, dim2, ...) produces all combinations of grouping sets.
     - Group by CUBE statement do not pass through the facts table and aggregate all possible combinations of the dimensions.
+
+### Introduction to Cloud Data Warehouses
+
+#### Cloud Data Warehouses Storages
+
+SQL
+
+- AWS
+  - Amazon RDS (MySQL, PostgreSQL, MariaDB, Oracle, MS SQL Server)
+  - Amazon Aurora (MySQL, PostgreSQL)
+- Azure
+  - Azure SQL Database (MS SQL Server)
+  - Azure Database for MySQL
+  - Azure Database for MariaDB
+  - Azure Database for PostgreSQL
+- Google Cloud
+  - Cloud SQL (MySQL, PostgreSQL, and MS SQL Server)
+
+NOSQL
+
+- AWS
+  - Amazon DynamoDB
+  - Amazon DocumentDB
+  - Amazon Keyspaces
+  - Amazon Neptune
+  - Amazon Timestream
+- Azure
+  - Azure Cosmos DB
+  - MongoDB
+  - Cassandra
+  - Gremlin
+- Google Cloud
+  - Cloud Bigtable
+  - Cloud Firestore
+  - Cloud MongoDB
+
+#### Cloud Data Warehouses Pipelines Services
+
+Cloud base tools
+
+- AWS: Glue
+- Azure: Data Factory
+- Google Cloud: Dataflow
+
+For streaming data
+
+- AWS: Kinesis
+- Azure: Streaming Analytics
+- Google Cloud: Dataflow
+
+#### Cloud DataWarehouses Solutions
+
+- AWS: Redshift
+- Azure: SQL Data Warehouse, Synapse Analytics
+- Google Cloud: BigQuery
