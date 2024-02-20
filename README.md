@@ -316,3 +316,52 @@ Cassandra Query Language (CQL) is a query language for the Apache Cassandra data
 - The WHERE clause is how you will be accessing your data, and is very important to get right.
 - The partition key will be used in the WHERE clause.
 - It is possible to do a query without a WHERE clause, but it is not recommended (ALLOW FILTERING).
+
+## 02 - Cloud Data Warehouses
+
+### Introduction to Data Warehouses
+
+- Data Warehouse is a system that enables us to support analytical processes:
+  - Reporting
+  - Data Analysis
+  - Business Intelligence
+  - Decision Making
+- A copy of transaction data specifically structured for query and analysis.
+
+#### Data Warehouse Architecture: Kimball Bus Architecture
+
+- Results in common dimension data model shared by different departments.
+- Data is not kept as the aggregate level, but at the atomic level.
+- Organized by business process, and used by different departments.
+
+##### ETL
+
+- Extract: Get data from different sources, transfer data to the data warehouse. Normally as regularly batch jobs. (Query #3NF DB)
+- Transform: Clean, aggregate, and transform data. (Join tables, change data types, add columns, etc.)
+- Load: Load data into the data warehouse. Structured into the dimensional data model. (Query #Star Schema)
+
+### ETL and Dimensional Modeling
+
+#### Steps to create a Data Warehouse
+
+- Step 1: Define the data warehouse requirements: What are the business processes? What are the measurements?
+- Step 2: Explore the 3NF database: What are the tables? What are the columns?
+- Step 3: Insights from the 3NF database: What are the business processes? What are the measurements?
+- Step 4: Create facts and dimensions tables: What are the facts? What are the dimensions?
+  - Fact tables:
+    - Record business events
+    - Record measurements
+  - Dimension tables:
+    - Record business entities
+    - Record business processes
+    - Record business measurements
+- Step 5: ETL the data from 3NF tables to Facts & Dimension Tables: What are the ETL processes?
+- step 6: Create the OLAP cubes: What are the OLAP cubes?
+  - OLAP (Online Analytical Processing) cubes are a way to pre-aggregate data for quick queries.
+    - Roll-up: Grouping data from one dimension, stepping up the level of aggregation to a large grouping (e.g. summing up sales by month)
+    - Drill-down: Breaking data down into more detail (e.g. breaking sales by month into sales by day)
+    - Slice: Selecting a single dimension and viewing all of its data, reduce N to N - 1 dimensiones (e.g. viewing all sales by month)
+    - Dice: Selecting two or more dimensions and viewing all of their data (e.g. viewing all sales by month and product)
+  - Grouping sets:
+    - Group by CUBE(dim1, dim2, ...) produces all combinations of grouping sets.
+    - Group by CUBE statement do not pass through the facts table and aggregate all possible combinations of the dimensions.
