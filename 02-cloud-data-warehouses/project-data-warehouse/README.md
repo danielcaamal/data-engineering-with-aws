@@ -117,7 +117,7 @@ Note: This could be done manually or using the AWS SDKs, examples could be found
 - Modify the `dwh.cfg` file as follows:
   - Add the `HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` and the `DB_PORT` for the Redshift cluster in the `CLUSTER` section.
   - Add the `ARN` for the IAM role in the `IAM_ROLE` section.
-  - Add the `LOG_DATA`, `LOG_JSONPATH` and `SONG_DATA` for the S3 bucket in the `S3` section.
+  - Add the `LOG_DATA`, `LOG_JSONPATH`,`REGION` and `SONG_DATA` for the S3 bucket in the `S3` section.
 
 Optionally (If using the AWS SDKs for local testing):
 
@@ -171,6 +171,10 @@ Execute the following command to create the tables in the Redshift cluster
 
 ```bash
 $ python create_tables.py
+
+Dropping tables
+Creating tables
+Tables dropped and created successfully
 ```
 
 - It will drop the tables if they already exist.
@@ -211,10 +215,90 @@ $ python utils/role_management.py delete
 Example output from the execution
 
 ```bash
-python create_tables.py
+$ python create_tables.py
+
+Loading staging tables
+Inserting tables
+            table  count
+0  staging_events   8056
+1   staging_songs  14896
+2       songplays   9957
+3           users    104
+4           songs  14896
+5         artists  10025
+6            time   6813
+ETL process completed
 
 ```
+
+### Project results
+
+#### Initial considerations
+
+- Every table has a primary key, for the case of the redshift cluster, the primary key is also the sort key.
+- The "basic" or "classic" varchar has the length of 255 characters (No more needed for this datasets, and also each column could be configured with less).
+
+##### Staging Tables configuration
+
+The staging tables are used to get the data from the S3 bucket to the Redshift cluster.
+
+- The IDENTITY(0,1) is used as serial for the primary key in the staging tables.
+
+The staging tables are:
+
+- staging_events:
+  - The primary key is the event_id.
+  - Only the event_id and the ts are bigints, the other columns are varchar(255), float, integers.
+  - Only the event_id is not null.
+  - The gender is a varchar(1).
+  - The copy command includes the FORMAT AS JSON 's3://udacity-dend/log_json_path.json' to parse the JSON data.
+- staging_songs
+  - There is not special columns types, all are varchar(255), float, integers.
+  - For the case of artist_id and song_id are not null and the length is limited to 18 characters.
+  - The sort key is ths song_id.
+  - The dist key is the artist_id.
+  - The copy command includes the FORMAT AS JSON 'auto' to parse the JSON data.
+  - The copy command includes the ACCEPTINVCHARS to accept the invalid characters in the JSON data.
+
+![Staging Tables](./images/project-result-staging-table.png)
+
+##### Data Model (Star Schema) configuration
+
+The data model is a star schema with the following tables:
+
+- songplays (Fact Table):
+
+  - The primary key is the songplay_id.
+  - The start_time is a TIMESTAMP, and is calculated as: `TIMESTAMP 'epoch' + ts/1000 * interval '1 second'`.
+  - For the case of artist_id and song_id are not null and the length is limited to 18 characters.
+
+- songs (Dimension Table):
+  - The primary key is the song_id and is not null (The song_id is a varchar(18)).
+  - The artist_id is a varchar(18), and is not null.
+- artists (Dimension Table)
+  - The primary key is the artist_id and is not null (The artist_id is a varchar(18)).
+  - The latitude and longitude are varchars, but also could be floats.
+- users (Dimension Table)
+  - The primary key is the user_id and is not null, is an integer.
+  - The gender is a varchar(1).
+- time (Dimension Table)
+  - The primary key is the start_time, and is not null, is a TIMESTAMP and is calculated as: `TIMESTAMP 'epoch' + ts/1000 * interval '1 second'`.
+  - The hour, day, week, month, year and weekday are integers calculated from the start_time (The start_time is a TIMESTAMP).
+
+![Data Model](./images/project-result-start-schema.png)
+
+### Summary
+
+This project is interesting because even with the project instructions it was a challenge to get with the data model right and to get the data from the S3 bucket to the Redshift cluster. The table pg_catalog.stl_load_errors was very useful to get the errors in the COPY command (the course material needs to be updated with this information).
+
+The principal challenges were:
+
+- To get the data model right, and to get the data from the S3 bucket to the Redshift cluster.
+- To adapt the SQL statements to the Redshift syntax.
+- To get the exact SQL statements to create the analytics tables from the staging tables.
+- To get the exact SQL statements to insert the data from the staging tables to the analytics tables.
 
 ### Project improvements
 
 1. The `etl.py` script could be improved to handle the case when the data is already loaded in the Redshift cluster.
+2. the presentation of the data is the most important part of the project, and here is just a table with counts, that could be improved.

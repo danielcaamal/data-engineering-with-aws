@@ -3,6 +3,8 @@ import psycopg2
 import pandas as pd
 
 def test_counts(cur, conn):
+    """Test the number of rows in each table
+    """
     data = {'table': ['staging_events', 'staging_songs', 'songplays', 'users', 'songs', 'artists', 'time'],
             'count': []}
     for table in data['table']:
@@ -15,6 +17,8 @@ def test_counts(cur, conn):
     print(df)
     
 def test_aux(cur, conn):
+    """Test the auxiliary table for getting the errors in the copy command
+    """
     cur.execute("""
                 select * from pg_catalog.stl_load_errors 
                 """)

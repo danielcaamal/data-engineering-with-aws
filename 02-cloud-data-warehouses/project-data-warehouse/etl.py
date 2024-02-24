@@ -10,9 +10,8 @@ def load_staging_tables(cur, conn):
           cur (cursor): cursor object
           conn (connection): connection object
     """
-    print('Loading staging tables')
+    print('Loading staging tables, this may take a while...')
     for query in copy_table_queries:
-        print(query)
         cur.execute(query)
         conn.commit()
 
@@ -26,7 +25,6 @@ def insert_tables(cur, conn):
     """
     print('Inserting tables')
     for query in insert_table_queries:
-        print(query)
         cur.execute(query)
         conn.commit()
 

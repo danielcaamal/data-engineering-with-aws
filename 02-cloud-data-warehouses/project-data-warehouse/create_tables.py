@@ -10,8 +10,8 @@ def drop_tables(cur, conn):
         cur (cursor): cursor object
         conn (connection): connection object
     """
+    print("Dropping tables")
     for query in drop_table_queries:
-        print(query)
         cur.execute(query)
         conn.commit()
 
@@ -23,13 +23,15 @@ def create_tables(cur, conn):
         cur (cursor): cursor object
         conn (connection): connection object
     """
+    print("Creating tables")
     for query in create_table_queries:
-        print(query)
         cur.execute(query)
         conn.commit()
 
 
 def main():
+    """Main function to drop and create tables in the database
+    """
     config = configparser.ConfigParser()
     config.read('dwh.cfg')
 
@@ -40,6 +42,7 @@ def main():
     create_tables(cur, conn)
 
     conn.close()
+    print("Tables dropped and created successfully")
 
 
 if __name__ == "__main__":

@@ -42,12 +42,12 @@ staging_events_table_create= ("""
 staging_songs_table_create = ("""
   CREATE TABLE IF NOT EXISTS staging_songs (
     num_songs               INTEGER                 NULL,
-    artist_id               VARCHAR(18)             NOT NULL SORTKEY DISTKEY,
+    artist_id               VARCHAR(18)             NOT NULL SORTKEY,
     artist_latitude         VARCHAR(255)            NULL,
     artist_longitude        VARCHAR(255)            NULL,
     artist_location         VARCHAR(255)            NULL,
     artist_name             VARCHAR(255)            NULL,
-    song_id                 VARCHAR(18)             NOT NULL,
+    song_id                 VARCHAR(18)             NOT NULL DISTKEY,
     title                   VARCHAR(255)            NULL,
     duration                FLOAT                   NULL,
     year                    INTEGER                 NULL
@@ -56,7 +56,7 @@ staging_songs_table_create = ("""
 
 songplay_table_create = ("""
   CREATE TABLE IF NOT EXISTS songplays (
-    songplay_id             INTEGER IDENTITY(0,1)   NOT NULL SORTKEY,
+    songplay_id             INTEGER IDENTITY(0,1) PRIMARY KEY NOT NULL SORTKEY,
     start_time              TIMESTAMP               NOT NULL,
     user_id                 INTEGER                 NOT NULL,
     level                   VARCHAR(255)            NULL,
@@ -70,7 +70,7 @@ songplay_table_create = ("""
 
 user_table_create = ("""
   CREATE TABLE IF NOT EXISTS users (
-    user_id                 INTEGER                 NOT NULL SORTKEY,
+    user_id                 INTEGER PRIMARY KEY     NOT NULL SORTKEY,
     first_name              VARCHAR(255)            NULL,
     last_name               VARCHAR(255)            NULL,
     gender                  VARCHAR(1)              NULL,
@@ -80,7 +80,7 @@ user_table_create = ("""
 
 song_table_create = ("""
   CREATE TABLE IF NOT EXISTS songs (
-    song_id                 VARCHAR(18)             NOT NULL SORTKEY,
+    song_id                 VARCHAR(18) PRIMARY KEY NOT NULL SORTKEY,
     title                   VARCHAR(255)            NULL,
     artist_id               VARCHAR(18)             NOT NULL,
     year                    INTEGER                 NULL,
@@ -90,7 +90,7 @@ song_table_create = ("""
 
 artist_table_create = ("""
   CREATE TABLE IF NOT EXISTS artists (
-    artist_id               VARCHAR(18)             NOT NULL SORTKEY,
+    artist_id               VARCHAR(18) PRIMARY KEY NOT NULL SORTKEY,
     name                    VARCHAR(255)            NULL,
     location                VARCHAR(255)            NULL,
     latitude                VARCHAR(255)            NULL,
@@ -131,7 +131,6 @@ staging_songs_copy = ("""
   CREDENTIALS 'aws_iam_role={}'
   FORMAT AS JSON 'auto'
   ACCEPTINVCHARS AS '^'
-  STATUPDATE ON
   REGION {};
 """).format(
   config.get('S3', 'SONG_DATA'),
