@@ -515,3 +515,327 @@ Sorting keys are used to sort the data within each slice. This is beneficial for
 - Rows are stored before distribution to slices.
 - Minimizes the query time.
 - Useful for columns that are frequently used in joins and for range-restricted predicates.
+
+### 03 - Spark and Data Lakes
+
+#### Data Warehouses, Data Lakes and Data Lakehouses
+
+- Data Warehouse: A system that enables us to support analytical processes.
+  - Perform well with structured data.
+  - Do not perform well with unstructured data.
+  - Do not perform well with semi-structured data.
+  - Do not perform well with large amounts of data.
+  - Do not perform well with data that is not well defined.
+- Data Lake: A system that enables us to store and analyze large amounts of data.
+  - Data lakes provide schema-on-read rather than schema-on-write which lowers the cost and work of ingesting large amounts of data.
+  - Data lakes provide support for structured, semi-structured, and unstructured data.
+  - Perform well with large amounts of data.
+  - Do not perform well with analytical processes.
+  - Lower costs associated with using big data tools for ETL / ELT operations.
+- Data Lakehouse: A system that enables us to store and analyze large amounts of data, and support analytical processes.
+  - Data lakehouses provide schema-on-read rather than schema-on-write which lowers the cost and work of ingesting large amounts of data.
+  - Data lakehouses provide support for structured, semi-structured, and unstructured data.
+  - Perform well with large amounts of data.
+  - Perform well with analytical processes.
+  - Lower costs associated with using big data tools for ETL / ELT operations.
+
+![Data Warehouses, Data Lakes and Data Lakehouses](images/data-wh-data-lk-data-lh.png)
+
+#### Introduction to Hadoop
+
+Vocabulary
+
+- Hadoop: An open-source software framework for storing data and running applications on clusters of commodity hardware. The major difference between Hadoop and Spark is that Hadoop uses a disk-based storage system, whereas Spark uses an in-memory storage system. That means Spark can access data much more quickly than Hadoop.
+- Hadoop Distributed File System (HDFS): A distributed file system that provides high-throughput access to application data. Splits files into large blocks and distributes them across nodes in a cluster.
+- Hadoop MapReduce: A software framework for easily writing applications which process vast amounts of data (multi-terabyte data-sets) in-parallel on large clusters (thousands of nodes) of commodity hardware in a reliable, fault-tolerant manner.
+- Hadoop YARN: A resource-management platform responsible for managing compute resources in clusters and using them for scheduling of users' applications.
+
+##### MapReduce
+
+MapReduce is a programming technique for manipulating large data sets. "Hadoop MapReduce" is a specific implementation of this programming technique.
+
+The technique works by first dividing up a large dataset and distributing the data across a cluster. In the map step, each data is analyzed and converted into a (key, value) pair. Then these key-value pairs are shuffled across the cluster so that all keys are on the same machine. In the reduce step, the values with the same keys are combined together.
+
+While Spark doesn't implement MapReduce, you can write Spark programs that behave in a similar way to the map-reduce paradigm. In the next section, you will run through a code example.
+
+Steps:
+
+- Map: The input data is divided into splits and distributed across the cluster. Each split is then processed by a map function to produce a set of intermediate key-value pairs.
+- Shuffle: The intermediate key-value pairs are shuffled across the cluster so that all pairs with the same key are on the same machine.
+- Reduce: The intermediate key-value pairs are then processed by a reduce function. The reduce function can iterate through the data and produce a new set of key-value pairs.
+
+#### Introduction to Spark
+
+Spark is one of the most popular big data tools. It is an open-source distributed general-purpose cluster-computing framework. Spark provides an interface for programming entire clusters with implicit data parallelism and fault tolerance.
+
+##### The Spark Cluster
+
+- Local Mode: A single machine running Spark where the driver and the executor are on the same machine.
+- Standalone Mode: A cluster manager that comes with Spark. It is a simple cluster manager included with Spark that makes it easy to set up a cluster.
+- YARN Mode: A cluster manager that comes with Hadoop. It is a resource manager that schedules jobs across the cluster.
+- Mesos Mode: A cluster manager that comes with Mesos. It is a general cluster manager that can also run Hadoop MapReduce and service applications.
+  ![The Spark Cluster](images/spark-clusters.png)
+
+##### Spark not use cases
+
+- Spark is meant for big data sets that cannot fit on one computer.
+  - For this cases you can use Pandas, R, AWK, etc.
+- Spark is meant for data that needs to be distributed across a cluster.
+
+##### Spark's Limitations
+
+- Spark's streaming capabilities are not as mature as other streaming systems like Kafka, Apache Flink, or AWS Kinesis.
+- Spark's machine learning library is not as mature as other machine learning libraries like scikit-learn or TensorFlow.
+
+#### Introduction to Data Lakes
+
+##### Lakehouse Architecture
+
+The key innovation of the lakehouse architecture is the creation of a metadata and data governance layer on top of the data lake.
+
+- This creates a pool of raw data as well as a curated set of data.
+- This provides the flexibility and benefits we previously saw with data lakes, and it also provides solutions to the weaknesses in data lakes.
+
+One of the important features of a lakehouse architecture is the ability to quickly ingest large amounts of data and then incrementally improve the quality of the data. We can think of this process using the colors we often associate with Olympic medals.
+
+- Raw ingested data can be considered bronze.
+- After some filtering, cleaning, and augmenting, the data can be considered silver.
+- Finally, with the addition of business-level aggregates such as you might see with a star schema, data can be considered gold and ready for analytics and reporting needs.
+
+#### Spark essentials
+
+##### The Spark DAG
+
+- Idempotent code: An idempotent program can run multiple times without any effect on the result. Some programs depend on prior state in order to execute properly. This is not considered idempotent, because they depend on that state existing before starting.
+
+- Dividing the work: One goal of idempotent code is that data can be processed in parallel, or simultaneously. This is done by calling the same code repeatedly in different threads, and on different nodes or servers for each chunk or block of data. If each program has no reliance on prior execution, there should be no problem splitting up processing.
+
+- Directed Acyclic Graph (DAG): A DAG is a collection of all the tasks that need to be executed to complete a program. Each task is a node in the graph, and the connections between tasks are the edges. The graph is directed because the edges have a direction from one task to another. The graph is acyclic because there are no cycles, or loops, in the graph.
+
+- Resilent Distributed Dataset (RDD): An RDD is a collection of elements that can be operated on in parallel. RDDs are resilient because they remember their lineage, or how they were created. If an RDD is lost, it can be recreated using its lineage. RDDs are distributed because they are spread out across a cluster of computers.
+
+###### The Spark session
+
+- The Spark Context: The Spark Context is the main entry point for Spark functionality. It allows you to create RDDs, accumulators, and broadcast variables. The Spark Context also allows you to set various parameters for your application, such as the application name, the master URL for the cluster, as well as other parameters.
+- The Spark Session: The Spark Session is new to Spark 2.0. It includes all the functionality of the Spark Context, as well as the functionality of SQLContext. The Spark Session provides a single point of entry to interact with underlying Spark functionality and allows programming Spark with DataFrame and Dataset APIs.
+
+###### Maps and Lambda Functions
+
+One of the most common functions in Spark is map. It simply makes a copy of the original input data and transforms that copy according to whatever function you pass to map.
+
+- Spark will not actually execute the map function until it absolutely has to. This is known as **lazy evaluation**. (For the execution it could be used the `collect` method)
+
+##### Using in AWS
+
+When you want to rent a cluster of machines on AWS to run Spark, you have several choices:
+
+- EMR - EMR is an AWS managed Spark service a scalable set of EC2 machines already configured to run Spark. You don't manage the systems, only configure the necessary cluster resources.
+- EC2 - Use AWS Elastic Compute (EC2) machines and install and configure Spark and HDFS yourself.
+- Glue - Glue is a serverless Spark environment with added libraries like the Glue Context and Glue Dynamic Frames. It also interfaces with other AWS data services like Data Catalog and AWS Athena.
+
+#### Introduction to AWS Glue
+
+Glue is an AWS Service that relies on Spark. Glue Studio allows to write purely Spark scripts.
+
+- Routing Table: A routing table is an entity that stores the network paths to various locations. For example, it will store the path to S3 from within your VPC. You'll need a routing table to configure with your VPC Gateway.
+- VPC Gateway: A VPC Gateway is a network entity that gives access to outside networks and resources. Since S3 doesn't reside in your VPC, you need a VPC Gateway to establish a secure connection between your VPC and S3. This allows your Glue Job, or any other resources within the VPC, to utilize S3 for data storage and retrieval.
+- S3 Gateway Endpoint: A S3 Gateway Endpoint is a network entity that allows your VPC to access S3 without going through the public internet. This is important for security and performance reasons. You'll need to configure a S3 Gateway Endpoint to allow your Glue Job to access S3.
+- S3 Buckets: Buckets are storage locations within AWS, that have a hierarchical directory-like structure. Once you create an S3 bucket, you can create as many sub-directories, and files as you want. The bucket is the "parent" of all of these directories and files.
+
+1. Expose the S3 bucket to the VPC and create a gateway endpoint.
+
+```bash
+aws s3 mb s3://_______
+aws ec2 describe-vpcs
+aws ec2 describe-route-tables
+aws ec2 create-vpc-endpoint --vpc-id _______ --service-name com.amazonaws.us-east-1.s3 --route-table-ids _______
+```
+
+2. Create The Glue Policy
+
+```bash
+aws iam create-role --role-name my-glue-service-role --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "glue.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}'
+
+aws iam put-role-policy --role-name my-glue-service-role --policy-name S3Access --policy-document '{ "Version": "2012-10-17", "Statement": [ { "Sid": "ListObjectsInBucket", "Effect": "Allow", "Action": [ "s3:ListBucket" ], "Resource": [ "arn:aws:s3:::_______" ] }, { "Sid": "AllObjectActions", "Effect": "Allow", "Action": "s3:*Object", "Resource": [ "arn:aws:s3:::_______/*" ] } ] }'
+
+aws iam put-role-policy --role-name my-glue-service-role --policy-name GlueAccess --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "glue:*",
+                "s3:GetBucketLocation",
+                "s3:ListBucket",
+                "s3:ListAllMyBuckets",
+                "s3:GetBucketAcl",
+                "ec2:DescribeVpcEndpoints",
+                "ec2:DescribeRouteTables",
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcAttribute",
+                "iam:ListRolePolicies",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "cloudwatch:PutMetricData"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:CreateBucket",
+                "s3:PutBucketPublicAccessBlock"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-glue-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-glue-*/*",
+                "arn:aws:s3:::*/*aws-glue-*/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::crawler-public*",
+                "arn:aws:s3:::aws-glue-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:AssociateKmsKey"
+            ],
+            "Resource": [
+                "arn:aws:logs:*:*:/aws-glue/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateTags",
+                "ec2:DeleteTags"
+            ],
+            "Condition": {
+                "ForAllValues:StringEquals": {
+                    "aws:TagKeys": [
+                        "aws-glue-service-resource"
+                    ]
+                }
+            },
+            "Resource": [
+                "arn:aws:ec2:*:*:network-interface/*",
+                "arn:aws:ec2:*:*:security-group/*",
+                "arn:aws:ec2:*:*:instance/*"
+            ]
+        }
+    ]
+}'
+```
+
+##### Spark Jobs
+
+Jupyter notebooks are great for prototyping as well as exploring and visualizing your data. However, Jupyter notebooks aren't the best tool for automating your workflow, that's where Python scripts come into play.
+
+##### Glue Studio
+
+Glue Studio is a Graphical User Interface (GUI) for interacting with Glue to create Spark jobs with added capabilities. Glue APIs give access to things like Glue Tables, and Glue Context. These APIs are designed to enhance your Spark experience by simplifying development.
+
+You can create Glue Jobs by writing, and uploading python code, but Glue Studio also provides a drag and drop experience. When you create a flow diagram using Glue Studio, it generates the Python or Scala Code for you automatically. The code is stored with additional configuration for running in Spark, including third-party libraries, job parameters, and the AWS IAM Role Glue uses.
+
+###### Glue Studio Visual Editor
+
+The Glue Studio Visual Editor allows you to select three types of nodes when creating a pipeline:
+
+- Source- the data that will be consumed in the pipeline
+- Transform - any transformation that will be applied
+- Target - the destination for the data
+
+##### Extract (Sources)
+
+A common source is an S3 location or a Glue Table. But a source can be any AWS Database including:
+
+- Amazon S3
+- AWS Glue Data Catalog
+- Amazon DynamoDB
+- Amazon Kinesis
+- Apache Kafka
+- Amazon Redshift
+- MySQL
+- PostgreSQL
+- Microsoft SQL Server
+- Oracle SQL
+- Snowflake
+- Google BigQuery
+
+##### Transform
+
+Common transformations include Joins, Field Mapping, and Filter. Custom SQL statements are also supported. Here is a list of some of the transformations available:
+
+- Apply Mapping
+- Select Fields
+- Drop Fields
+- Drop Null Fields
+- Drop Duplicates
+- Rename Field
+- Spigot
+- Join
+- Split Fields
+- Select from Collection
+- Filter
+- Union
+- Aggregate
+- Fill Missing Values
+- Custom Transform
+- Custom SQL
+- Detect PII
+
+##### Load (Targets)
+
+All of the source types are also supported as targets. We will discuss more in this course about how to organize S3 storage and catalog it as Glue Tables in a way that keeps data logically separated.
+
+#### The Lake House Architecture
+
+The Lakehouse is another evolution of data storage. The purpose of a Lakehouse is to separate data processing into stages. Like an oil refinery, data is staged and processed step by step until it becomes available for querying.
+
+Lakehouse is not a specific technology. It can be implemented using any file storage and processing layer. In AWS, the most common way to store files is in S3, so we can implement the Lakehouse using S3 storage.
+
+- Landing Zone / Bronze or Raw Zone
+  For pipelines that store data in the S3 data lake, data is ingested from the source into the landing zone as-is. The processing layer then validates the landing zone data and stores it in the raw zone bucket or prefix for permanent storage.
+
+- Trusted Zone / Silver Zone
+  The processing layer applies the schema, partitioning, and other transformations to the raw zone data to bring it to a conformed state and stores it in trusted zone.
+
+- Curated Zone / Gold Zone
+  Typically, datasets from the curated layer are partly or fully ingested into Amazon Redshift data warehouse storage to serve use cases that need very low latency access or need to run complex SQL queries.
