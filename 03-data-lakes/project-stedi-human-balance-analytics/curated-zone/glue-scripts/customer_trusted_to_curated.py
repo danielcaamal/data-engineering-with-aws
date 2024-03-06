@@ -14,18 +14,18 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args["JOB_NAME"], args)
 
-# Script generated for node Customer Trusted
-CustomerTrusted_node1709693598170 = glueContext.create_dynamic_frame.from_catalog(
-    database="stedi",
-    table_name="customer_trusted",
-    transformation_ctx="CustomerTrusted_node1709693598170",
-)
-
 # Script generated for node Accelerometer Trusted
 AccelerometerTrusted_node1709693599420 = glueContext.create_dynamic_frame.from_catalog(
     database="stedi",
     table_name="accelerometer_trusted",
     transformation_ctx="AccelerometerTrusted_node1709693599420",
+)
+
+# Script generated for node Customer Trusted
+CustomerTrusted_node1709693598170 = glueContext.create_dynamic_frame.from_catalog(
+    database="stedi",
+    table_name="customer_trusted",
+    transformation_ctx="CustomerTrusted_node1709693598170",
 )
 
 # Script generated for node Join
@@ -52,15 +52,17 @@ DropDuplicates_node1709693799280 = DynamicFrame.fromDF(
 )
 
 # Script generated for node Amazon S3
-AmazonS3_node1709693802522 = glueContext.write_dynamic_frame.from_options(
-    frame=DropDuplicates_node1709693799280,
+AmazonS3_node1709693802522 = glueContext.getSink(
+    path="s3://project-stedi-human-balance-analytics/customer_curated/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://project-stedi-human-balance-analytics/customer_curated/",
-        "partitionKeys": [],
-    },
+    updateBehavior="UPDATE_IN_DATABASE",
+    partitionKeys=[],
+    enableUpdateCatalog=True,
     transformation_ctx="AmazonS3_node1709693802522",
 )
-
+AmazonS3_node1709693802522.setCatalogInfo(
+    catalogDatabase="stedi", catalogTableName="customer_curated"
+)
+AmazonS3_node1709693802522.setFormat("json")
+AmazonS3_node1709693802522.writeFrame(DropDuplicates_node1709693799280)
 job.commit()

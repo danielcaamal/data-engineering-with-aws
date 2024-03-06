@@ -51,15 +51,17 @@ DropFieldsManually_node1709696457195 = sparkSqlQuery(
 )
 
 # Script generated for node Step Trainer Trusted
-StepTrainerTrusted_node1709694611319 = glueContext.write_dynamic_frame.from_options(
-    frame=DropFieldsManually_node1709696457195,
+StepTrainerTrusted_node1709694611319 = glueContext.getSink(
+    path="s3://project-stedi-human-balance-analytics/step_trainer_trusted/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://project-stedi-human-balance-analytics/step_trainer_trusted/",
-        "partitionKeys": [],
-    },
+    updateBehavior="UPDATE_IN_DATABASE",
+    partitionKeys=[],
+    enableUpdateCatalog=True,
     transformation_ctx="StepTrainerTrusted_node1709694611319",
 )
-
+StepTrainerTrusted_node1709694611319.setCatalogInfo(
+    catalogDatabase="stedi", catalogTableName="step_trainer_trusted"
+)
+StepTrainerTrusted_node1709694611319.setFormat("json")
+StepTrainerTrusted_node1709694611319.writeFrame(DropFieldsManually_node1709696457195)
 job.commit()

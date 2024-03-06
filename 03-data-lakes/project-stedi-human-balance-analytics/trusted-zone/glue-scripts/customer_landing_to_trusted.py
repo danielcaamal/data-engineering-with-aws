@@ -41,15 +41,17 @@ SQLQuery_node1709691946562 = sparkSqlQuery(
 )
 
 # Script generated for node Customer Trusted
-CustomerTrusted_node1709690770390 = glueContext.write_dynamic_frame.from_options(
-    frame=SQLQuery_node1709691946562,
+CustomerTrusted_node1709690770390 = glueContext.getSink(
+    path="s3://project-stedi-human-balance-analytics/customer_trusted/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://project-stedi-human-balance-analytics/customer_trusted/",
-        "partitionKeys": [],
-    },
+    updateBehavior="UPDATE_IN_DATABASE",
+    partitionKeys=[],
+    enableUpdateCatalog=True,
     transformation_ctx="CustomerTrusted_node1709690770390",
 )
-
+CustomerTrusted_node1709690770390.setCatalogInfo(
+    catalogDatabase="stedi", catalogTableName="customer_trusted"
+)
+CustomerTrusted_node1709690770390.setFormat("json")
+CustomerTrusted_node1709690770390.writeFrame(SQLQuery_node1709691946562)
 job.commit()
