@@ -35,24 +35,18 @@ StepTrainerLanding_node1709694594637 = glueContext.create_dynamic_frame.from_cat
     transformation_ctx="StepTrainerLanding_node1709694594637",
 )
 
-# Script generated for node Join
-Join_node1709694606569 = Join.apply(
-    frame1=StepTrainerLanding_node1709694594637,
-    frame2=CustomerCurated_node1709694603676,
-    keys1=["serialnumber"],
-    keys2=["serialnumber"],
-    transformation_ctx="Join_node1709694606569",
-)
-
 # Script generated for node Drop Fields Manually
 SqlQuery0 = """
-select distinct serialnumber, sensorreadingtime, distancefromobject 
-from myDataSource
+SELECT stl.sensorReadingTime, stl.serialNumber, stl.distanceFromObject  FROM customer_curated cc 
+INNER JOIN step_trainer_landing stl on stl.serialnumber = cc.serialnumber
 """
 DropFieldsManually_node1709696457195 = sparkSqlQuery(
     glueContext,
     query=SqlQuery0,
-    mapping={"myDataSource": Join_node1709694606569},
+    mapping={
+        "step_trainer_landing": StepTrainerLanding_node1709694594637,
+        "customer_curated": CustomerCurated_node1709694603676,
+    },
     transformation_ctx="DropFieldsManually_node1709696457195",
 )
 
