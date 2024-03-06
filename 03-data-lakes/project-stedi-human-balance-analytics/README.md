@@ -44,7 +44,145 @@ You should have the following number of rows in each table:
   - Customer: 482
   - Machine Learning: 43681
 
-## Project requirements
+## Project setup
+
+Create an S3 bucket and upload the data files to the bucket.
+
+```bash
+# Create a Trusted Zone in AWS-Glue - S3
+aws s3 mb s3://project-stedi-human-balance-analytics
+
+# Create a VPC endpoint for S3
+aws ec2 create-vpc-endpoint --vpc-id ___ --service-name com.amazonaws.us-east-1.s3 --route-table-ids ___
+
+# Create a role for Glue
+aws iam create-role --role-name my-glue-service-role --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "glue.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}'
+
+
+# Attach policies to the role for S3
+aws iam put-role-policy --role-name my-glue-service-role --policy-name S3Access --policy-document '{ "Version": "2012-10-17", "Statement": [ { "Sid": "ListObjectsInBucket", "Effect": "Allow", "Action": [ "s3:ListBucket" ], "Resource": [ "arn:aws:s3:::project-stedi-human-balance-analytics" ] }, { "Sid": "AllObjectActions", "Effect": "Allow", "Action": "s3:*Object", "Resource": [ "arn:aws:s3:::project-stedi-human-balance-analytics/*" ] } ] }'
+
+# Attach policies to the role for Glue
+aws iam put-role-policy --role-name my-glue-service-role --policy-name GlueAccess --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "glue:*",
+                "s3:GetBucketLocation",
+                "s3:ListBucket",
+                "s3:ListAllMyBuckets",
+                "s3:GetBucketAcl",
+                "ec2:DescribeVpcEndpoints",
+                "ec2:DescribeRouteTables",
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcAttribute",
+                "iam:ListRolePolicies",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "cloudwatch:PutMetricData"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:CreateBucket",
+                "s3:PutBucketPublicAccessBlock"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-glue-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-glue-*/*",
+                "arn:aws:s3:::*/*aws-glue-*/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::crawler-public*",
+                "arn:aws:s3:::aws-glue-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:AssociateKmsKey"
+            ],
+            "Resource": [
+                "arn:aws:logs:*:*:/aws-glue/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateTags",
+                "ec2:DeleteTags"
+            ],
+            "Condition": {
+                "ForAllValues:StringEquals": {
+                    "aws:TagKeys": [
+                        "aws-glue-service-resource"
+                    ]
+                }
+            },
+            "Resource": [
+                "arn:aws:ec2:*:*:network-interface/*",
+                "arn:aws:ec2:*:*:security-group/*",
+                "arn:aws:ec2:*:*:instance/*"
+            ]
+        }
+    ]
+}'
+
+# Clone the repository
+git clone https://github.com/udacity/nd027-Data-Engineering-Data-Lakes-AWS-Exercises.git
+
+# Copy the project files into the project directory
+aws s3 cp ./nd027-Data-Engineering-Data-Lakes-AWS-Exercises/project/starter/accelerometer/landing s3://project-stedi-human-balance-analytics/accelerometer_landing --recursive
+
+aws s3 cp ./nd027-Data-Engineering-Data-Lakes-AWS-Exercises/project/starter/customer/landing s3://project-stedi-human-balance-analytics/customer_landing --recursive
+
+aws s3 cp ./nd027-Data-Engineering-Data-Lakes-AWS-Exercises/project/starter/step_trainer/landing s3://project-stedi-human-balance-analytics/step_trainer_landing --recursive
+```
+
+You should have the following directory and files in the S3 bucket:
+![S3 Bucket](./images/project-setup.png)
+
+## Project checklist
 
 ### Landing Zone
 
