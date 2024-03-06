@@ -190,9 +190,9 @@ You should have the following directory and files in the S3 bucket:
 
 customer_landing_to_trusted.py, accelerometer_landing_to_trusted.py, and step_trainer_trusted.py Glue jobs have a node that connects to S3 bucket for customer, accelerometer, and step trainer landing zones.
 
-- [customer_landing_to_trusted.py](./landing-zone/glue-scripts/customer_landing_to_trusted.py)
-- [accelerometer_landing_to_trusted.py](./landing-zone/glue-scripts/accelerometer_landing_to_trusted.py)
-- [step_trainer_landing_to_trusted.py](./landing-zone/glue-scripts/step_trainer_landing_to_trusted.py)
+- [customer_landing_to_trusted.py](./trusted-zone/glue-scripts/customer_landing_to_trusted.py)
+- [accelerometer_landing_to_trusted.py](./trusted-zone/glue-scripts/accelerometer_landing_to_trusted.py)
+- [step_trainer_trusted.py](./trusted-zone/glue-scripts/step_trainer_trusted.py)
 
 #### Manually create a Glue Table using Glue Console from JSON data
 
@@ -222,8 +222,6 @@ Include screenshots showing various queries run on Athena, along with their resu
 Glue Job Python code shows that the option to dynamically infer and update schema is enabled.
 
 To do this, set the Create a table in the Data Catalog and, on subsequent runs, update the schema and add new partitions option to True.
-
-- [dynamic_schema_update.png](./trusted-zone/screenshots/dynamic_schema_update.png)
 
 #### Use Athena to query Trusted Glue Tables
 
@@ -267,7 +265,7 @@ customer_trusted_to_curated.py has a node that inner joins the customer_trusted 
 
 step_trainer_trusted.py has a node that inner joins the step_trainer_landing data with the customer_curated data by serial numbers
 
-- [step_trainer_trusted.py](./curated-zone/glue-scripts/step_trainer_trusted.py)
+- [step_trainer_trusted.py](./trusted-zone/glue-scripts/step_trainer_trusted.py)
 
 machine_learning_curated.py has a node that inner joins the step_trainer_trusted data with the accelerometer_trusted data by sensor reading time and timestamps
 
