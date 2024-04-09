@@ -35,8 +35,6 @@ class LoadFactOperator(BaseOperator):
             raise ValueError('The table is required')
         if not self.sql_insert:
             raise ValueError('The sql insert is required')
-        if not self.insert_mode:
-            raise ValueError('The insert mode is required')
         if self.insert_mode not in ["replace", "append"]:
             raise ValueError('The insert mode should be either "replace" or "append"')
 
@@ -45,7 +43,9 @@ class LoadFactOperator(BaseOperator):
     
         
     def __load_data_into_fact_table(self, redshift):
-        self.log.info("Loading data into fact table in redshift")
+        self.log.info(f"Loading data into fact table {self.table} in redshift")
+        
+        # It should be append only
         if self.insert_mode == "replace":
           self.log.info(f"Deleting data from {self.table}")
           redshift.run(f"DELETE FROM {self.table}")

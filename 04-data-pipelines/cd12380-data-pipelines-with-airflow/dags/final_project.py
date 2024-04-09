@@ -61,24 +61,40 @@ def final_project():
         redshift_conn_id="redshift",
         table="songplays",
         sql_insert=SqlQueries.songplay_table_insert,
+        insert_mode="replace",
+    )
+
+    load_user_dimension_table = LoadDimensionOperator(
+        task_id='Load_user_dim_table',
+        redshift_conn_id="redshift",
+        table="users",
+        sql_insert=SqlQueries.user_table_insert,
         insert_mode="append",
     )
 
-    # load_user_dimension_table = LoadDimensionOperator(
-    #     task_id='Load_user_dim_table',
-    # )
+    load_song_dimension_table = LoadDimensionOperator(
+        task_id='Load_song_dim_table',
+        redshift_conn_id="redshift",
+        table="songs",
+        sql_insert=SqlQueries.song_table_insert,
+        insert_mode="append",
+    )
 
-    # load_song_dimension_table = LoadDimensionOperator(
-    #     task_id='Load_song_dim_table',
-    # )
+    load_artist_dimension_table = LoadDimensionOperator(
+        task_id='Load_artist_dim_table',
+        redshift_conn_id="redshift",
+        table="artists",
+        sql_insert=SqlQueries.artist_table_insert,
+        insert_mode="append",
+    )
 
-    # load_artist_dimension_table = LoadDimensionOperator(
-    #     task_id='Load_artist_dim_table',
-    # )
-
-    # load_time_dimension_table = LoadDimensionOperator(
-    #     task_id='Load_time_dim_table',
-    # )
+    load_time_dimension_table = LoadDimensionOperator(
+        task_id='Load_time_dim_table',
+        redshift_conn_id="redshift",
+        table="time",
+        sql_insert=SqlQueries.time_table_insert,
+        insert_mode="append",
+    )
 
     # run_quality_checks = DataQualityOperator(
     #     task_id='Run_data_quality_checks',
@@ -94,10 +110,10 @@ def final_project():
     stage_songs_to_redshift >> load_songplays_table
 
     # # Load dimension tables
-    # load_songplays_table >> load_user_dimension_table
-    # load_songplays_table >> load_song_dimension_table
-    # load_songplays_table >> load_artist_dimension_table
-    # load_songplays_table >> load_time_dimension_table
+    load_songplays_table >> load_user_dimension_table
+    load_songplays_table >> load_song_dimension_table
+    load_songplays_table >> load_artist_dimension_table
+    load_songplays_table >> load_time_dimension_table
 
     # # Quality check
     # load_user_dimension_table >> run_quality_checks
