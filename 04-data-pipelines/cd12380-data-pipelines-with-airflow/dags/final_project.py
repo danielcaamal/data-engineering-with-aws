@@ -13,7 +13,7 @@ default_args = {
     'owner': 'udacity',
     'depends_on_past': False,
     'start_date': pendulum.now(),
-    # 'retries': 3,
+    'retries': 3,
     'retry_delay': timedelta(minutes=5),
     'email_on_retry': False,
     'catchup': False,
