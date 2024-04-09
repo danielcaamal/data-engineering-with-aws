@@ -68,10 +68,10 @@ class LoadFactOperator(BaseOperator):
         self.log.info(f"Loading data into fact table {self.table} in redshift")
         
         # It should be append only
-        # if self.insert_mode == "replace":
-        #   self.log.info(f"Deleting data from {self.table}")
-        #   redshift.run(f"DELETE FROM {self.table}")
-        #   self.log.info(f"Inserting data into {self.table}")
+        if self.insert_mode == "replace":
+          self.log.info(f"Deleting data from {self.table}")
+          redshift.run(f"DELETE FROM {self.table}")
+          self.log.info(f"Inserting data into {self.table}")
         
         redshift.run(f"""INSERT INTO {self.table} {self.sql_insert} ;""")
         self.log.info("Data loaded into fact table in redshift")
