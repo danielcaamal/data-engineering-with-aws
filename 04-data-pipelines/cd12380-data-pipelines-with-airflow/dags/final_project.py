@@ -24,7 +24,8 @@ default_args = {
     default_args=default_args,
     description='Load and transform data in Redshift with Airflow',
     # The DAG has a correct schedule (once an hour)
-    schedule_interval='0 * * * *'
+    schedule_interval='0 * * * *',
+    tags=['project-data-pipelines'],
 )
 def final_project():
 
@@ -36,13 +37,13 @@ def final_project():
         aws_credentials_id="aws_credentials",
         table="staging_events",
         s3_bucket="project-data-pipelines",
-        s3_key="log-data/{year}/{month}",
-        s3_key_json_location="log_json_path.json",
-        context={
-            'year':'2018',
-            'month': '11'
-        },
-        sql_create=SqlQueries.staging_events_table_create,
+        s3_key="log-data",
+        copy_params="REGION 'us-east-1' FORMAT AS JSON 's3://project-data-pipelines/log_json_path.json'",
+        # s3_key="log-data/{year}/{month}",
+        # context={
+        #     'year':'2018',
+        #     'month': '11'
+        # },
     )
 
     stage_songs_to_redshift = StageToRedshiftOperator(
@@ -51,13 +52,17 @@ def final_project():
         aws_credentials_id="aws_credentials",
         table="staging_songs",
         s3_bucket="project-data-pipelines",
-        s3_key="song-data/A/A/A/",
-        sql_create=SqlQueries.staging_songs_table_create,
+        s3_key="song-data/A/A/B",
+        copy_params="REGION 'us-east-1' FORMAT as JSON 'auto' TRUNCATECOLUMNS BLANKSASNULL EMPTYASNULL",
     )
 
-    # load_songplays_table = LoadFactOperator(
-    #     task_id='Load_songplays_fact_table',
-    # )
+    load_songplays_table = LoadFactOperator(
+        task_id='Load_songplays_fact_table',
+        redshift_conn_id="redshift",
+        table="songplays",
+        sql_insert=SqlQueries.songplay_table_insert,
+        insert_mode="append",
+    )
 
     # load_user_dimension_table = LoadDimensionOperator(
     #     task_id='Load_user_dim_table',
@@ -85,8 +90,8 @@ def final_project():
     # Staging tables
     start_operator >> stage_events_to_redshift
     start_operator >> stage_songs_to_redshift
-    # stage_events_to_redshift >> load_songplays_table
-    # stage_songs_to_redshift >> load_songplays_table
+    stage_events_to_redshift >> load_songplays_table
+    stage_songs_to_redshift >> load_songplays_table
 
     # # Load dimension tables
     # load_songplays_table >> load_user_dimension_table

@@ -5,22 +5,13 @@ from airflow.utils.decorators import apply_defaults
 
 class StageToRedshiftOperator(BaseOperator):
     ui_color = '#358140'
+    template_fields = ("s3_key",)
     copy_sql = """
         COPY {}
         FROM '{}'
         ACCESS_KEY_ID '{}'
-        SECRET_ACCESS_KEY '{}'
-        IGNOREHEADER {}
-        DELIMITER '{}'
-    """
-
-    copy_sql_json = """
-        COPY {}
-        FROM '{}'
-        ACCESS_KEY_ID '{}'
-        SECRET_ACCESS_KEY '{}'
-        FORMAT AS JSON '{}'
-        ACCEPTINVCHARS AS '^'
+        SECRET_ACCESS_KEY '{}'  
+        {}
     """
 
     @apply_defaults
@@ -33,10 +24,7 @@ class StageToRedshiftOperator(BaseOperator):
                  table="",
                  s3_bucket="",
                  s3_key="",
-                 s3_key_json_location="",
-                 delimiter=",",
-                 sql_create="",
-                 ignore_headers=1,
+                 copy_params="",
                  context={},
                  *args, **kwargs):
 
@@ -48,13 +36,23 @@ class StageToRedshiftOperator(BaseOperator):
         self.redshift_conn_id = redshift_conn_id
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
-        self.delimiter = delimiter
-        self.ignore_headers = ignore_headers
         self.aws_credentials_id = aws_credentials_id
-        self.s3_key_json_location = s3_key_json_location
         self.context = context
-        self.sql_create = sql_create
+        self.copy_params = copy_params
+        self.__validate_params()
 
+    def __validate_params(self):
+        if not self.redshift_conn_id:
+            assert ValueError('The redshift connection id must be provided')
+        if not self.aws_credentials_id:
+            assert ValueError('The aws credentials id must be provided')
+        if not self.table:
+            assert ValueError('The table name must be provided')
+        if not self.s3_bucket:
+            assert ValueError('The s3 bucket name must be provided')
+        if not self.s3_key:
+            assert ValueError('The s3 key must be provided')
+    
     def __get_s3_credentials(self):
         self.log.info("Getting s3 credentials")
         aws_hook = AwsHook(self.aws_credentials_id)
@@ -81,37 +79,27 @@ class StageToRedshiftOperator(BaseOperator):
 
     def __get_redshift_hook(self):
         return PostgresHook(postgres_conn_id=self.redshift_conn_id)
-
-    def __create_redshift_table(self, redshift):
-        if not self.sql_create:
-            assert ValueError('The sql create is required')
+    
+    def __clean_redshift_table(self, redshift):
         self.log.info("Clearing data from destination Redshift table")
-        redshift.run("DROP TABLE IF EXISTS {}".format(self.table))
-        self.log.info("Creating the redshift table")
-        redshift.run("{}".format(self.sql_create))
+        redshift.run(f"DELETE FROM {self.table}")
+        self.log.info("Data cleared from destination Redshift table")
 
     def __get_copy_query(self, s3_credentials, s3_path):
-        formatted_sql = ''
-        if not self.s3_key_json_location:
-            self.log.info("Creating the query to copy the data from S3 to Redshift")
-            formatted_sql = StageToRedshiftOperator.copy_sql.format(
-                self.table,
-                s3_path,
-                s3_credentials.access_key,
-                s3_credentials.secret_key,
-                self.ignore_headers,
-                self.delimiter
-            )
-        else:
-            self.log.info("Creating the query to copy the data (AS JSON) from S3 to Redshift")
-            formatted_sql = StageToRedshiftOperator.copy_sql_json.format(
-                self.table,
-                s3_path,
-                s3_credentials.access_key,
-                s3_credentials.secret_key,
-                f's3://{self.s3_bucket}/{self.s3_key_json_location}'
-            )
+        self.log.info("Creating the query to copy the data from S3 to Redshift")
+        formatted_sql = StageToRedshiftOperator.copy_sql.format(
+            self.table,
+            s3_path,
+            s3_credentials.access_key,
+            s3_credentials.secret_key,
+            self.copy_params,
+        )
         return formatted_sql
+      
+    def __execute_copy_query(self, redshift, formatted_sql):
+        self.log.info("Copying data from S3 to Redshift")
+        redshift.run(formatted_sql)
+        self.log.info("Data copied from S3 to Redshift")
 
     def execute(self, context):
         self.log.info("Starting the StageToRedshiftOperator")
@@ -125,14 +113,14 @@ class StageToRedshiftOperator(BaseOperator):
         # Get the redshift hook instance
         redshift = self.__get_redshift_hook()
 
-        # Clean and create the table in redshift
-        self.__create_redshift_table(redshift)
+        # Clean the table in redshift
+        self.__clean_redshift_table(redshift)
         
         # Get the query to be executed as copy command
         formatted_sql = self.__get_copy_query(s3_credentials, s3_path)
-            
-        self.log.info("Copying data from S3 to Redshift")
-        redshift.run(formatted_sql)
+        
+        # Execute the copy command
+        self.__execute_copy_query(redshift, formatted_sql)
 
 
 
