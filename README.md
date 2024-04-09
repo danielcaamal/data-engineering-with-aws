@@ -516,9 +516,9 @@ Sorting keys are used to sort the data within each slice. This is beneficial for
 - Minimizes the query time.
 - Useful for columns that are frequently used in joins and for range-restricted predicates.
 
-### 03 - Spark and Data Lakes
+## 03 - Spark and Data Lakes
 
-#### Data Warehouses, Data Lakes and Data Lakehouses
+### Data Warehouses, Data Lakes and Data Lakehouses
 
 - Data Warehouse: A system that enables us to support analytical processes.
   - Perform well with structured data.
@@ -541,7 +541,7 @@ Sorting keys are used to sort the data within each slice. This is beneficial for
 
 ![Data Warehouses, Data Lakes and Data Lakehouses](images/data-wh-data-lk-data-lh.png)
 
-#### Introduction to Hadoop
+### Introduction to Hadoop
 
 Vocabulary
 
@@ -550,7 +550,7 @@ Vocabulary
 - Hadoop MapReduce: A software framework for easily writing applications which process vast amounts of data (multi-terabyte data-sets) in-parallel on large clusters (thousands of nodes) of commodity hardware in a reliable, fault-tolerant manner.
 - Hadoop YARN: A resource-management platform responsible for managing compute resources in clusters and using them for scheduling of users' applications.
 
-##### MapReduce
+#### MapReduce
 
 MapReduce is a programming technique for manipulating large data sets. "Hadoop MapReduce" is a specific implementation of this programming technique.
 
@@ -564,11 +564,11 @@ Steps:
 - Shuffle: The intermediate key-value pairs are shuffled across the cluster so that all pairs with the same key are on the same machine.
 - Reduce: The intermediate key-value pairs are then processed by a reduce function. The reduce function can iterate through the data and produce a new set of key-value pairs.
 
-#### Introduction to Spark
+### Introduction to Spark
 
 Spark is one of the most popular big data tools. It is an open-source distributed general-purpose cluster-computing framework. Spark provides an interface for programming entire clusters with implicit data parallelism and fault tolerance.
 
-##### The Spark Cluster
+#### The Spark Cluster
 
 - Local Mode: A single machine running Spark where the driver and the executor are on the same machine.
 - Standalone Mode: A cluster manager that comes with Spark. It is a simple cluster manager included with Spark that makes it easy to set up a cluster.
@@ -576,20 +576,20 @@ Spark is one of the most popular big data tools. It is an open-source distribute
 - Mesos Mode: A cluster manager that comes with Mesos. It is a general cluster manager that can also run Hadoop MapReduce and service applications.
   ![The Spark Cluster](images/spark-clusters.png)
 
-##### Spark not use cases
+#### Spark not use cases
 
 - Spark is meant for big data sets that cannot fit on one computer.
   - For this cases you can use Pandas, R, AWK, etc.
 - Spark is meant for data that needs to be distributed across a cluster.
 
-##### Spark's Limitations
+#### Spark's Limitations
 
 - Spark's streaming capabilities are not as mature as other streaming systems like Kafka, Apache Flink, or AWS Kinesis.
 - Spark's machine learning library is not as mature as other machine learning libraries like scikit-learn or TensorFlow.
 
-#### Introduction to Data Lakes
+### Introduction to Data Lakes
 
-##### Lakehouse Architecture
+#### Lakehouse Architecture
 
 The key innovation of the lakehouse architecture is the creation of a metadata and data governance layer on top of the data lake.
 
@@ -602,9 +602,9 @@ One of the important features of a lakehouse architecture is the ability to quic
 - After some filtering, cleaning, and augmenting, the data can be considered silver.
 - Finally, with the addition of business-level aggregates such as you might see with a star schema, data can be considered gold and ready for analytics and reporting needs.
 
-#### Spark essentials
+### Spark essentials
 
-##### The Spark DAG
+#### The Spark DAG
 
 - Idempotent code: An idempotent program can run multiple times without any effect on the result. Some programs depend on prior state in order to execute properly. This is not considered idempotent, because they depend on that state existing before starting.
 
@@ -614,18 +614,18 @@ One of the important features of a lakehouse architecture is the ability to quic
 
 - Resilent Distributed Dataset (RDD): An RDD is a collection of elements that can be operated on in parallel. RDDs are resilient because they remember their lineage, or how they were created. If an RDD is lost, it can be recreated using its lineage. RDDs are distributed because they are spread out across a cluster of computers.
 
-###### The Spark session
+##### The Spark session
 
 - The Spark Context: The Spark Context is the main entry point for Spark functionality. It allows you to create RDDs, accumulators, and broadcast variables. The Spark Context also allows you to set various parameters for your application, such as the application name, the master URL for the cluster, as well as other parameters.
 - The Spark Session: The Spark Session is new to Spark 2.0. It includes all the functionality of the Spark Context, as well as the functionality of SQLContext. The Spark Session provides a single point of entry to interact with underlying Spark functionality and allows programming Spark with DataFrame and Dataset APIs.
 
-###### Maps and Lambda Functions
+##### Maps and Lambda Functions
 
 One of the most common functions in Spark is map. It simply makes a copy of the original input data and transforms that copy according to whatever function you pass to map.
 
 - Spark will not actually execute the map function until it absolutely has to. This is known as **lazy evaluation**. (For the execution it could be used the `collect` method)
 
-##### Using in AWS
+#### Using in AWS
 
 When you want to rent a cluster of machines on AWS to run Spark, you have several choices:
 
@@ -633,7 +633,7 @@ When you want to rent a cluster of machines on AWS to run Spark, you have severa
 - EC2 - Use AWS Elastic Compute (EC2) machines and install and configure Spark and HDFS yourself.
 - Glue - Glue is a serverless Spark environment with added libraries like the Glue Context and Glue Dynamic Frames. It also interfaces with other AWS data services like Data Catalog and AWS Athena.
 
-#### Introduction to AWS Glue
+### Introduction to AWS Glue
 
 Glue is an AWS Service that relies on Spark. Glue Studio allows to write purely Spark scripts.
 
@@ -764,17 +764,17 @@ aws iam put-role-policy --role-name my-glue-service-role --policy-name GlueAcces
 }'
 ```
 
-##### Spark Jobs
+#### Spark Jobs
 
 Jupyter notebooks are great for prototyping as well as exploring and visualizing your data. However, Jupyter notebooks aren't the best tool for automating your workflow, that's where Python scripts come into play.
 
-##### Glue Studio
+#### Glue Studio
 
 Glue Studio is a Graphical User Interface (GUI) for interacting with Glue to create Spark jobs with added capabilities. Glue APIs give access to things like Glue Tables, and Glue Context. These APIs are designed to enhance your Spark experience by simplifying development.
 
 You can create Glue Jobs by writing, and uploading python code, but Glue Studio also provides a drag and drop experience. When you create a flow diagram using Glue Studio, it generates the Python or Scala Code for you automatically. The code is stored with additional configuration for running in Spark, including third-party libraries, job parameters, and the AWS IAM Role Glue uses.
 
-###### Glue Studio Visual Editor
+##### Glue Studio Visual Editor
 
 The Glue Studio Visual Editor allows you to select three types of nodes when creating a pipeline:
 
@@ -782,7 +782,7 @@ The Glue Studio Visual Editor allows you to select three types of nodes when cre
 - Transform - any transformation that will be applied
 - Target - the destination for the data
 
-##### Extract (Sources)
+#### Extract (Sources)
 
 A common source is an S3 location or a Glue Table. But a source can be any AWS Database including:
 
@@ -799,7 +799,7 @@ A common source is an S3 location or a Glue Table. But a source can be any AWS D
 - Snowflake
 - Google BigQuery
 
-##### Transform
+#### Transform
 
 Common transformations include Joins, Field Mapping, and Filter. Custom SQL statements are also supported. Here is a list of some of the transformations available:
 
@@ -821,11 +821,11 @@ Common transformations include Joins, Field Mapping, and Filter. Custom SQL stat
 - Custom SQL
 - Detect PII
 
-##### Load (Targets)
+#### Load (Targets)
 
 All of the source types are also supported as targets. We will discuss more in this course about how to organize S3 storage and catalog it as Glue Tables in a way that keeps data logically separated.
 
-#### The Lake House Architecture
+### The Lake House Architecture
 
 The Lakehouse is another evolution of data storage. The purpose of a Lakehouse is to separate data processing into stages. Like an oil refinery, data is staged and processed step by step until it becomes available for querying.
 
@@ -839,3 +839,33 @@ Lakehouse is not a specific technology. It can be implemented using any file sto
 
 - Curated Zone / Gold Zone
   Typically, datasets from the curated layer are partly or fully ingested into Amazon Redshift data warehouse storage to serve use cases that need very low latency access or need to run complex SQL queries.
+
+## 04 - Automate Data Pipelines
+
+### Introduction to Automating Data Pipelines
+
+#### DAGs and Data Pipelines
+
+- Directed Acyclic Graphs (DAGs): DAGs are a special subset of graphs in which the edges between nodes have a specific direction, and no cycles exist. When we say “no cycles exist” what we mean is the nodes can't create a path back to themselves.
+- Nodes: A step in the data pipeline process.
+- Edges: The dependencies or relationships other between nodes.
+
+![DAGs and Data Pipelines](images/dags.png)
+
+- Data Validation: Data Validation is the process of ensuring that data is present, correct & meaningful. Ensuring the quality of your data through automated validation checks is a critical step in building data pipelines at any organization.
+
+In summary, DAGs are a way to visualize the steps in a data pipeline and the dependencies between those steps. They are a useful tool for understanding the flow of data and the order in which steps need to be executed.
+
+A data pipeline is a series of data processing elements connected in a sequence. The output of one element is the input of the next. The elements of a pipeline are often executed in parallel or in time-sliced fashion.
+
+Data pipelines are used to move data from one system to another, or to transform data from one format to another. They are often used in data warehouses, data lakes, and data lakehouses.
+
+#### Apache Airflow
+
+##### Apache Airflow Components
+
+- Scheduler orchestrates the execution of jobs on a trigger or schedule. The Scheduler chooses how to prioritize the running and execution of tasks within the system. You can learn more about the Scheduler from the official Apache Airflow documentation(opens in a new tab).
+- Work Queue is used by the scheduler in most Airflow installations to deliver tasks that need to be run to the Workers.
+- Worker processes execute the operations defined in each DAG. In most Airflow installations, workers pull from the work queue when it is ready to process a task. When the worker completes the execution of the task, it will attempt to process more work from the work queue until there is no further work remaining. When work in the queue arrives, the worker will begin to process it.
+- Metastore Database saves credentials, connections, history, and configuration. The database, often referred to as the metadata database, also stores the state of all tasks in the system. Airflow components interact with the database with the Python ORM, SQLAlchemy(opens in a new tab).
+- Web Interface provides a control dashboard for users and maintainers. Throughout this course you will see how the web interface allows users to perform tasks such as stopping and starting DAGs, retrying failed tasks, configuring credentials, The web interface is built using the Flask web-development microframework(opens in a new tab).
