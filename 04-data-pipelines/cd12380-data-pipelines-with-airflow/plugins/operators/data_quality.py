@@ -12,7 +12,7 @@ class DataQualityOperator(BaseOperator):
     def __init__(
                   self,
                   redshift_conn_id="",
-                  sql_queries=[],
+                  dq_checks=[],
                   *args, **kwargs):
         """Initialize the DataQualityOperator, inheriting from BaseOperator.
 
@@ -22,7 +22,7 @@ class DataQualityOperator(BaseOperator):
         """
         super(DataQualityOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
-        self.sql_queries = sql_queries
+        self.dq_checks = dq_checks
         
     
     def __run_data_quality_checks(self):
@@ -33,37 +33,33 @@ class DataQualityOperator(BaseOperator):
         """
         redshift_hook = PostgresHook(self.redshift_conn_id)
         
-        # Check for empty tables
-        for query in self.sql_queries.count_rows:
-            records = redshift_hook.get_records(query)
-            if len(records) < 1 or len(records[0]) < 1:
-                raise ValueError(f"Data quality check failed. {query} returned no results")
-            num_records = records[0][0]
-            if num_records < 1:
-                raise ValueError(f"Data quality check failed. {query} contained 0 rows")
-            self.log.info(f"Data quality check passed. {query} returned {records[0][0]} records")
-        
-        # Check for null values
-        for query in self.sql_queries.check_nulls:
-            records = redshift_hook.get_records(query)
-            if len(records) < 1 or len(records[0]) < 1:
-                raise ValueError(f"Data quality check failed. {query} returned no results")
-            num_records = records[0][0]
-            if num_records > 0:
-                raise ValueError(f"Data quality check failed. {query} contained {records[0][0]} null values")
-            self.log.info(f"Data quality check passed. {query} returned 0 null values")
-        
-        # Check for duplicates
-        for query in self.sql_queries.check_duplicates:
-            records = redshift_hook.get_records(query)
-            if len(records) < 1 or len(records[0]) < 1:
-                raise ValueError(f"Data quality check failed. {query} returned no results")
-            num_records = records[0][0]
-            if num_records > 0:
-                raise ValueError(f"Data quality check failed. {query} contained {records[0][0]} duplicates")
-            self.log.info(f"Data quality check passed. {query} returned 0 duplicates")
+        # Check data_quality_checks
+        # Example {'check_sql': "xxx", 'expected_result': xxx , comparison:'>'}]
+        for check in self.dq_checks:
+            check_sql = check.get('check_sql')
+            expected_result = check.get('expected_result')
+            comparison = check.get('comparison')
             
+            self.log.info(f'Running data quality check: {check_sql}')
+            records = redshift_hook.get_records(check_sql)
             
+            if len(records) < 1 or len(records[0]) < 1:
+                raise ValueError(f"Data quality check failed. {check_sql} returned no results")
+            
+            num_records = records[0][0]
+            if comparison == '>':
+                if num_records <= expected_result:
+                    raise ValueError(f"Data quality check failed. {check_sql} returned {num_records} records, expected more than {expected_result}")
+            elif comparison == '=':
+                if num_records != expected_result:
+                    raise ValueError(f"Data quality check failed. {check_sql} returned {num_records} records, expected {expected_result}")
+            elif comparison == '<':
+                if num_records >= expected_result:
+                    raise ValueError(f"Data quality check failed. {check_sql} returned {num_records} records, expected less than {expected_result}")
+            else:
+                raise ValueError(f"Data quality check failed. Comparison operator {comparison} not supported")
+            
+            self.log.info(f"Data quality check passed. {check_sql} returned {num_records} records")
 
     def execute(self, context):
         """Execute the operator to run data quality checks

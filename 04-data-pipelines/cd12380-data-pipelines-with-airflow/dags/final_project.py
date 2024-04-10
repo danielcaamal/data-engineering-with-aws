@@ -125,7 +125,7 @@ def final_project():
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
         redshift_conn_id="redshift",
-        sql_queries= SqlDataQualityQueries,
+        dq_checks=SqlDataQualityQueries.data_quality_checks,
     )
 
     # End execution
